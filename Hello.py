@@ -3,9 +3,9 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import pandas as pd
 
-# Load the pre-trained mini-LM model
-tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
-model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
+# Load the pre-trained LLM model
+tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-1.3B")
 
 # Create a Streamlit app
 st.title("Legal Solution Generator")
