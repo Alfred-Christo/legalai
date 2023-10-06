@@ -1,51 +1,31 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import streamlit as st
-from streamlit.logger import get_logger
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import pandas as pd
 
-LOGGER = get_logger(__name__)
+# Load the pre-trained mini-LM model
+tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
+model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
+# Create a Streamlit app
+st.title("Legal Solution Generator")
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
+# Add a text input field for the user to enter their legal problem
+user_input = st.text_input("Enter your legal problem:")
+
+# Generate legal-based solutions for the user's problem
+if user_input:
+    # Add the user's input to the model prompt
+    prompt = "Legal problem: " + user_input + "\nLegal solution:"
+    # Generate the solution using the model
+    output = model.generate(
+        input_ids=tokenizer.encode(prompt, return_tensors="pt"),
+        max_length=1000,
+        temperature=0.7,
     )
-
-    st.write("# Welcome to Streamlit! 👋")
-
-    st.sidebar.success("Select a demo above.")
-
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
-
-
-if __name__ == "__main__":
-    run()
+    # Decode the generated solution
+    solution = tokenizer.decode(output[0], skip_special_tokens=True)
+    # Display the generated solution in a table format
+    df = pd.DataFrame({"Legal Solution": [solution]})
+    st.table(df)
+    
